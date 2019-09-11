@@ -1,0 +1,11 @@
+[package]
+name = "tractor-cli"
+version = "0.1.0"
+authors = ["Austin Jones <austinbaysjones@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+tractor = { path = "../tractor/" }
+
+clap = "2.33.0"
+uuid = { version = "0.7.4", features = ["v4"] }
