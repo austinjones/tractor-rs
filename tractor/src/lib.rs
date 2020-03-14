@@ -305,9 +305,13 @@ impl TractorStorage {
         println!("Writing to path: {:?}", path.as_path());
         let mut file = File::create(path.as_path()).map_err(|e| PostError::NotWritable(e))?;
 
+        let mut buffered = BufWriter::new(file);
+
         value
-            .write_to(&mut file, format.get_image_format())
+            .write_to(&mut buffered, format.get_image_format())
             .map_err(|e| PostError::WriteFailed(e))?;
+
+        buffered.flush().map_err(|e|PostError::NotWritable(e))?;
 
         self.append_index(path.file_name().unwrap().to_str().unwrap())
             .map_err(|e| PostError::IndexWriteFailed(e))?;

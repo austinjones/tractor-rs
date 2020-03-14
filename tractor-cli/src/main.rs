@@ -26,7 +26,7 @@ pub fn main() -> Result<(), Error> {
                     Arg::with_name("resource")
                         .long("resource")
                         .short("u")
-                        .default_value("import-512")
+                        .default_value("import")
                         .help("Specifies the target resource name"),
                 )
                 .arg(
@@ -65,9 +65,16 @@ pub fn main() -> Result<(), Error> {
 }
 
 fn import_dir(resource_storage: &TractorStorage, path: &Path) -> Result<(), Error> {
-    for path in path.read_dir().map_err(|e| Error::ReadImportsError(e))? {
-        let path = path.map_err(|e| Error::ReadImportsError(e))?;
-        import_file(resource_storage, path.path().as_path())?;
+    let mut dir_entries = Vec::new();
+    for dir_entry in path.read_dir().map_err(|e| Error::ReadImportsError(e))? {
+        let entry = dir_entry.map_err(|e| Error::ReadImportsError(e))?;
+        dir_entries.push(entry);
+    }
+
+    dir_entries.sort_by_cached_key(|path| path.metadata().unwrap().modified().unwrap());
+
+    for entry in dir_entries {
+        import_file(resource_storage, entry.path().as_path())?;
     }
 
     Ok(())
